@@ -7,7 +7,7 @@ name: Build and deploy Python app to Azure Web App - nfb-web-app
 on:
   push:
     branches:
-      - web-app-dev
+      - webapp
   workflow_dispatch:
 
 jobs:
