@@ -8,9 +8,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 20px;
-            padding: 20px;
-            background-color: #f8f9fa;
+            line-height: 1.6;
         }
 
         h1,
@@ -19,52 +17,49 @@
         }
 
         .alert {
-            padding: 15px;
+            color: red;
+        }
+
+        .recipe-section {
             margin-bottom: 20px;
-            border: 1px solid transparent;
-            border-radius: 4px;
         }
 
-        .alert-danger {
-            color: #721c24;
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-        }
-
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            background-color: #e9ecef;
-            margin: 5px 0;
+        .recipe {
+            margin-bottom: 10px;
             padding: 10px;
-            border-radius: 4px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        .ingredients {
+            font-weight: bold;
+        }
+
+        .instructions {
+            font-style: italic;
         }
     </style>
 </head>
 
 <body>
-    <h1>No Food bAInd: Result</h1>
+    <h1>Processing Result</h1>
+
     {% if error %}
-    <div class="alert alert-danger">
+    <div class="alert">
         <strong>Error:</strong> {{ error }}
     </div>
     {% elif recipes %}
     <h2>Recipes:</h2>
-    <ul>
-        {% for recipe in recipes %}
-        <li>{{ recipe }}</li> <!-- Adjust as per the recipe structure -->
-        {% endfor %}
-    </ul>
+    <div class="recipe-section">
+        {{ recipes | safe }} <!-- Render the recipes as raw HTML -->
+    </div>
     {% else %}
     <p>No results to display.</p>
     {% endif %}
 
     {% if image_url %}
     <h2>Processed Image:</h2>
-    <img src="{{ image_url }}" alt="Processed Image" style="max-width: 100%; height: auto;">
+    <img src="{{ image_url }}" alt="Processed Image">
     {% endif %}
 </body>
 
