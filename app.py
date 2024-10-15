@@ -95,8 +95,8 @@ def results(job_id):
             )
             return render_template("results.html", error=error_message)
     else:
-        # Job still running
-        return "Job is still running. Please refresh the page.", 202
+        # Job still running, show the loading template
+        return render_template("loading.html"), 202
 
 
 if __name__ == "__main__":

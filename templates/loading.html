@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Processing Recipe...</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            margin-top: 20px;
+        }
+
+        .spinner-container {
+            position: relative;
+            margin-top: 50px;
+            width: 120px;
+            height: 120px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .spinner {
+            border: 12px solid #f3f3f3;
+            border-top: 12px solid #4CAF50;
+            border-radius: 50%;
+            width: 100px;
+            height: 100px;
+            animation: spin 1s linear infinite;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            margin: auto;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .tomato {
+            position: absolute;
+            top: 60%;
+            left: 60%;
+            transform: translate(-60%, -60%);
+            width: 60px;
+            height: 60px;
+        }
+
+        p {
+            margin-top: 20px;
+            font-size: 18px;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Processing Your Recipe</h1>
+    <div class="spinner-container">
+        <div class="spinner"></div>
+        <img src="{{ url_for('static', filename='tomato.png') }}" alt="Tomato" class="tomato">
+    </div>
+    <p>Your recipe is being generated. Please wait...</p>
+    <script>
+        // Poll the server to check the status every 5 seconds
+        setInterval(function () {
+            window.location.reload();
+        }, 5000);
+    </script>
+</body>
+
+</html>
