@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Recipe</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #4CAF50;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .time-info {
+            text-align: center;
+            font-size: 18px;
+            margin-bottom: 30px;
+            font-weight: bold;
+            color: #555;
+        }
+
+        .container {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 40px;
+            flex-wrap: wrap;
+        }
+
+        /* Box 1: Food Required */
+        .box-1 {
+            background-color: #e8f5e9;
+            /* Light green */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        /* Box 2: Extras */
+        .box-2 {
+            background-color: #c8e6c9;
+            /* A bit darker green */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        /* Box 3: Steps */
+        .box-3 {
+            background-color: #a5d6a7;
+            /* Even darker green */
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            width: 600px;
+            max-width: 100%;
+            text-align: center;
+        }
+
+        .box h2 {
+            color: #4CAF50;
+            font-size: 22px;
+            margin-bottom: 15px;
+        }
+
+        ul {
+            padding-left: 20px;
+            text-align: left;
+        }
+
+        ul li {
+            margin-bottom: 10px;
+        }
+
+        .steps {
+            list-style-type: decimal;
+            text-align: left;
+        }
+
+        .duration {
+            font-size: 18px;
+            color: #333;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Your Recipe</h1>
+
+    <!-- Display the total time -->
+    <div class="time-info">
+        Time of recipe: Preparation {{ recipes["Duration"][0] }} minutes | Cooking {{ recipes["Duration"][1] }} minutes
+    </div>
+
+    <div class="container">
+        <!-- Box 1: Food Required -->
+        <div class="box-1">
+            <h2>Food Required</h2>
+            <ul>
+                {% for ingredient in recipes["Ingredients"] %}
+                <li>{{ ingredient }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Box 2: Extras -->
+        <div class="box-2">
+            <h2>Extras</h2>
+            <ul>
+                {% for extra in recipes["Extra"] %}
+                <li>{{ extra }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+
+        <!-- Box 3: Steps -->
+        <div class="box-3">
+            <h2>Steps</h2>
+            <ol class="steps">
+                {% for step in recipes["Steps"] %}
+                <li>{{ step }}</li>
+                {% endfor %}
+            </ol>
+        </div>
+    </div>
+</body>
+
+</html>

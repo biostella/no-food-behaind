@@ -1,0 +1,6 @@
+Flask
+requests
+werkzeug
+gunicorn
+azure-storage-blob
+python-dotenv
