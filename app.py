@@ -1,7 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for
 import requests
+import json
 from werkzeug.utils import secure_filename
 from azure.storage.blob import BlobServiceClient
+from flask import Flask, render_template, request, redirect, url_for
 
 app = Flask(__name__)
 
@@ -82,6 +83,9 @@ def run_databricks_notebook(blob_url):
     }
     
     response = requests.post(url, headers=headers, json=data)
+    if response.status_code != 200:
+        return {"status": "error", "message": response.text}
+
     return response.json()
 
 # Route to check and display results
@@ -89,19 +93,24 @@ def run_databricks_notebook(blob_url):
 def results(job_id):
     # Poll Databricks to check if the job has completed
     run_status = get_databricks_job_status(job_id)
-    
+
     if run_status.get('state', {}).get('life_cycle_state') == 'TERMINATED':
         # Job is complete, fetch the results
         result = run_status.get('state', {}).get('result_state')
         if result == 'SUCCESS':
-            # Fetch the output (e.g., processed image or JSON results)
-            processed_image_url = fetch_databricks_output(job_id)
-            return render_template('results.html', image_url=processed_image_url)
+            # Assuming your job returns the recipes as JSON output
+            output = fetch_databricks_output(job_id)
+            if "recipes" in output:
+                return render_template('results.html', recipes=output.get("recipes"))
+            if "error" in output:
+                return render_template('results.html', error=output.get("error"))
         else:
-            return "Job failed", 500
+            error_message = run_status.get('state', {}).get('message', 'Job failed with no specific error.')
+            return render_template('results.html', error=error_message)
     else:
         # Job is still running, or queued
         return "Job is still running. Please refresh the page.", 202
+
 
 # Function to check job status in Databricks
 def get_databricks_job_status(job_id):
@@ -110,12 +119,64 @@ def get_databricks_job_status(job_id):
     response = requests.get(url, headers=headers)
     return response.json()
 
-# Function to fetch output from Databricks (e.g., processed image URL)
+# Function to fetch output from Databricks (e.g., processed image URL and recipes)
 def fetch_databricks_output(job_id):
-    # Implement logic to retrieve output from the job run
-    # Assuming the output is stored in a specific way in the notebook
-    return f"https://<databricks-instance>.azuredatabricks.net/files/output/{job_id}/processed_image.jpg"  # Adjust according to your needs
+    # Replace with your Databricks API token and workspace URL
+    databricks_api_token = DATABRICKS_TOKEN
+    databricks_instance = DATABRICKS_URL
 
+    # Set the headers for the API request
+    headers = {
+        'Authorization': f'Bearer {databricks_api_token}',
+        'Content-Type': 'application/json',
+    }
+
+    # Define the URL to retrieve the job run output (adjust as necessary)
+    run_output_url = f"{databricks_instance}/api/2.0/jobs/runs/get-output?run_id={job_id}"
+
+    # Make the request to fetch the job output
+    response = requests.get(run_output_url, headers=headers)
+    if response.status_code == 200:
+        try:
+            # Attempt to parse the response as JSON
+            output_data = response.json()
+
+            # Check if the job run has a notebook output
+            notebook_output = output_data.get('notebook_output', {})
+            if notebook_output:
+                # Extract the result and parse it as JSON
+                result_str = notebook_output.get('result', '')
+                result_data = json.loads(result_str) if result_str else {}
+
+                # Check the status of the output
+                if result_data.get('status') == 'success':
+                    # Assuming you have a key for image_url or similar in a successful output
+                    image_url = result_data.get('data', {}).get('image_url', '')
+                    recipes = result_data.get('data', {}).get('recipes', [])
+                    
+                    return {
+                        'image_url': image_url,
+                        'recipes': recipes,
+                    }
+                else:
+                    # If the status is error, get the error message
+                    error_message = result_data.get('message', 'Unknown error')
+                    print(f"Error from Databricks: {error_message}")
+                    return {
+                        'error': error_message
+                    }
+            else:
+                print("No notebook output found.")
+                return None
+
+        except ValueError as e:
+            print("Error parsing JSON:", e)
+            print("Response text:", response.text)  # Print the raw response text
+            return None
+    else:
+        # Handle errors, return None or raise an exception
+        print(f"Error fetching output: {response.status_code} - {response.text}")
+        return None
 
 if __name__ == '__main__':
     app.run(debug=True)

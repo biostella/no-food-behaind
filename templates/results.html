@@ -1,12 +1,71 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Image Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f8f9fa;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+
+        .alert-danger {
+            color: #721c24;
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+        }
+
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        li {
+            background-color: #e9ecef;
+            margin: 5px 0;
+            padding: 10px;
+            border-radius: 4px;
+        }
+    </style>
 </head>
+
 <body>
-    <h1>Processed Image</h1>
-    <img src="{{ image_url }}" alt="Processed Image">
+    <h1>No Food bAInd: Result</h1>
+    {% if error %}
+    <div class="alert alert-danger">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% elif recipes %}
+    <h2>Recipes:</h2>
+    <ul>
+        {% for recipe in recipes %}
+        <li>{{ recipe }}</li> <!-- Adjust as per the recipe structure -->
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No results to display.</p>
+    {% endif %}
+
+    {% if image_url %}
+    <h2>Processed Image:</h2>
+    <img src="{{ image_url }}" alt="Processed Image" style="max-width: 100%; height: auto;">
+    {% endif %}
 </body>
+
 </html>
