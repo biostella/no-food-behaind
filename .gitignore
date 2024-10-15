@@ -1,4 +1,9 @@
+# to ignore
+
+.vscode
+.env
 .venv 
 .DS_store
+
 __pycache__
 __pypackages__
