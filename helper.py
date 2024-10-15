@@ -20,13 +20,13 @@ def upload_to_azure_blob(
     return blob_url
 
 
-def run_databricks_notebook(databricks_url, databricks_token, job_id, blob_url):
+def run_databricks_notebook(databricks_url, databricks_token, job_id, blob_url, openai_api_key):
     """
     Triggers a Databricks notebook run with the given parameters.
     """
     url = f"{databricks_url}/api/2.0/jobs/run-now"
     headers = {"Authorization": f"Bearer {databricks_token}"}
-    data = {"job_id": job_id, "notebook_params": {"blob_url": blob_url}}
+    data = {"job_id": job_id, "notebook_params": {"blob_url": blob_url, "openai_api_key": openai_api_key}}
 
     response = requests.post(url, headers=headers, json=data)
     if response.status_code != 200:
