@@ -1,0 +1,22 @@
+Please see what it is available food inside the fridge including (food, meat, fruit, vegetable, sauce, drink). '
+
+Please ensure you can prepare 3 meals (starter, main, desert) for 1 person. Please minimise the extra ingredients but you can use oil, sugar, salt, pepper - those commonly available ingredients. 
+Please include what extra ingredients are needed. 
+
+Please try your best to make the common or well known food. 
+
+Close ingredients replacement are allowed. 
+
+Please include the details for the duration for preparation, the duration of cooking. 
+
+Please entails the steps for cooking.  
+
+Please output only in the JSON format without any extra contents. 
+
+This will be within the json format
+
+Ingredients: (list of the ingredients within the fridge and are required for cooking)
+Extra: (list of the ingredients/condiments not in the fridge but required)
+Duration: a list of number only -  [preparation time, cooking time]
+DishName: a list of the dish names
+Steps: a list of the steps required for the cooking (do not label any number sequence at each of the step, start with statement only)
