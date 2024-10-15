@@ -8,20 +8,37 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 20px;
         }
 
-        h1,
+        h1 {
+            color: #4CAF50;
+        }
+
         h2 {
             color: #333;
+            margin-top: 20px;
         }
 
         .alert {
             color: red;
+            font-weight: bold;
+            background-color: #ffdddd;
+            padding: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            margin-bottom: 20px;
         }
 
         .recipe-section {
             margin-bottom: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
 
         .recipe {
@@ -38,29 +55,51 @@
         .instructions {
             font-style: italic;
         }
+
+        .processed-image {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        img {
+            max-width: 100%;
+            border-radius: 10px;
+        }
     </style>
 </head>
 
 <body>
     <h1>Processing Result</h1>
 
+    <!-- Error Message Display -->
     {% if error %}
     <div class="alert">
         <strong>Error:</strong> {{ error }}
     </div>
     {% elif recipes %}
+
+    <!-- Recipe Display Section -->
     <h2>Recipes:</h2>
     <div class="recipe-section">
         {{ recipes | safe }} <!-- Render the recipes as raw HTML -->
     </div>
+
     {% else %}
     <p>No results to display.</p>
     {% endif %}
 
+    <!-- Processed Image Display -->
     {% if image_url %}
     <h2>Processed Image:</h2>
-    <img src="{{ image_url }}" alt="Processed Image">
+    <div class="processed-image">
+        <img src="{{ image_url }}" alt="Processed Image">
+    </div>
     {% endif %}
+
 </body>
 
 </html>
