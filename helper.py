@@ -88,7 +88,7 @@ def fetch_databricks_output(databricks_url, databricks_token, job_id):
         assistant_message = choices[0].get("message", {}).get("content", "")
         assistant_message = assistant_message.replace("`", "").replace("json", "")
         assistant_message = json.loads(assistant_message)
-        print(assistant_message)
+
         return {"recipes": assistant_message}
     except (KeyError, TypeError, json.JSONDecodeError):
         return {
