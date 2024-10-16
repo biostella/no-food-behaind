@@ -24,6 +24,7 @@ DATABRICKS_JOB_ID = os.getenv("DATABRICKS_JOB_ID")
 AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
 AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME")
 BLOB_TOKEN = os.getenv("BLOB_TOKEN")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Flask app initialization
 app = Flask(__name__)
@@ -65,7 +66,7 @@ def upload_file():
 
         # Trigger Databricks job with the image URL
         job_response = run_databricks_notebook(
-            DATABRICKS_URL, DATABRICKS_TOKEN, DATABRICKS_JOB_ID, blob_url
+            DATABRICKS_URL, DATABRICKS_TOKEN, DATABRICKS_JOB_ID, blob_url, OPENAI_API_KEY
         )
         job_id = job_response.get("run_id")
 
