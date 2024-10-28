@@ -24,7 +24,6 @@ This Flask-based web application allows users to upload food images, which are t
 This project requires the following to be installed:
 - Python 3.12
 - Flask
-- Azure SDK for Python
 - Databricks API access
 
 ## Setup Instructions
