@@ -1,49 +1,37 @@
+import base64
+import json
+import logging
 import os
-import sys
+import re
+from concurrent.futures import ThreadPoolExecutor
 
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
-
-from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 from flask import Flask, redirect, render_template, request, url_for
 from werkzeug.utils import secure_filename
 
-from helper import (
-    fetch_databricks_output,
-    get_databricks_job_status,
-    run_databricks_notebook,
-    upload_to_azure_blob,
+# Import helper functions
+from .helper import process_image, upload_to_dbfs
+
+# Logging configuration
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# Load environment variables
 load_dotenv()
-
-# Configurations loaded from environment variables
-DATABRICKS_TOKEN = os.getenv("DATABRICKS_TOKEN")
-DATABRICKS_URL = os.getenv("DATABRICKS_URL")
-DATABRICKS_JOB_ID = os.getenv("DATABRICKS_JOB_ID")
-AZURE_CONNECTION_STRING = os.getenv("AZURE_CONNECTION_STRING")
-AZURE_CONTAINER_NAME = os.getenv("AZURE_CONTAINER_NAME")
-BLOB_TOKEN = os.getenv("BLOB_TOKEN")
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # Flask app initialization
 app = Flask(__name__)
-
-# Configuration
-UPLOAD_FOLDER = "static/uploads/"
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
-
-# Initialize the BlobServiceClient
-blob_service_client = BlobServiceClient.from_connection_string(AZURE_CONNECTION_STRING)
+executor = ThreadPoolExecutor()
+tasks = {}
 
 
-# Route for homepage
+# Flask Routes
 @app.route("/")
 def index():
     return render_template("index.html")
 
 
-# Route to handle image upload
 @app.route("/upload", methods=["POST"])
 def upload_file():
     # Check if the post request has the file part
@@ -55,49 +43,74 @@ def upload_file():
     if file.filename == "":
         return "No selected file", 400
 
-    # Secure and validate the uploaded file
     if file:
         filename = secure_filename(file.filename)
+        logging.info(filename)
 
-        # Upload the file to Azure Blob Storage
-        blob_url = upload_to_azure_blob(
-            blob_service_client, AZURE_CONTAINER_NAME, file, filename, BLOB_TOKEN
-        )
+        # Read the file data once
+        file_data = file.read()
 
-        # Trigger Databricks job with the image URL
-        job_response = run_databricks_notebook(
-            DATABRICKS_URL, DATABRICKS_TOKEN, DATABRICKS_JOB_ID, blob_url, OPENAI_API_KEY
-        )
-        job_id = job_response.get("run_id")
+        # Encode the image to base64 using the same data
+        try:
+            encoded_image = base64.b64encode(file_data).decode("utf-8")
+            logging.info("IMAGE - Encoded Image Data Success.")
+        except Exception as e:
+            logging.error("IMAGE - Unable to encode image.")
+            return "Failed to encode image", 500
 
-        # Redirect to results page with job ID
-        return redirect(url_for("results", job_id=job_id))
+        # Store the future task, encoded_image, and upload status
+        tasks[filename] = {
+            "future": executor.submit(process_image, encoded_image),
+            "encoded_image": encoded_image,
+            "upload_submitted": False,  # Initially, the upload hasn't been submitted
+        }
+
+        return redirect(url_for("results", filename=filename))
 
 
-# Route to check and display results
-@app.route("/results/<job_id>")
-def results(job_id):
-    # Poll Databricks for job status
-    run_status = get_databricks_job_status(DATABRICKS_URL, DATABRICKS_TOKEN, job_id)
-
-    if run_status.get("state", {}).get("life_cycle_state") == "TERMINATED":
-        result = run_status.get("state", {}).get("result_state")
-
-        if result == "SUCCESS":
-            # Fetch job results
-            output = fetch_databricks_output(DATABRICKS_URL, DATABRICKS_TOKEN, job_id)
-            if "recipes" in output:
-                return render_template("results.html", recipes=output.get("recipes"))
-            if "error" in output:
-                return render_template("results.html", error=output.get("error"))
-        else:
-            error_message = run_status.get("state", {}).get(
-                "message", "Job failed with no specific error."
+@app.route("/results/<filename>")
+def results(filename):
+    try:
+        task_info = tasks.get(filename)
+        if not task_info:
+            return (
+                render_template(
+                    "results.html", error=f"Task for {filename} not found."
+                ),
+                404,
             )
-            return render_template("results.html", error=error_message)
-    else:
-        # Job still running, show the loading template
-        return render_template("loading.html"), 202
+
+        future = task_info["future"]
+        encoded_image = task_info["encoded_image"]
+        upload_submitted = task_info["upload_submitted"]
+
+        if future.done():
+            result = future.result()
+            if result.get("status") == "success":
+                completion_data = result.get("data", "{}")
+
+                # Ensure completion_data is a dictionary
+                if isinstance(completion_data, str):
+                    completion_data = json.loads(completion_data)
+
+                # Submit the upload task if not already submitted
+                if not upload_submitted:
+                    upload_future = executor.submit(
+                        upload_to_dbfs, filename, encoded_image
+                    )
+                    task_info["upload_submitted"] = True  # Prevent resubmission
+                    logging.info(f"SQL - File {filename} upload started in background.")
+
+                # Render the results page immediately
+                return render_template("results.html", recipes=completion_data)
+            else:
+                return render_template("results.html", error=result.get("data", "{}"))
+        else:
+            return render_template("loading.html"), 202
+
+    except Exception as e:
+        logging.exception("An error occurred in the results route.")
+        return render_template("results.html", error=str(e)), 500
 
 
 if __name__ == "__main__":
