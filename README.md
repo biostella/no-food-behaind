@@ -1,5 +1,5 @@
 
-# No-Food-Baind
+# No-Food-BehAInd
 
 Repository containing the project submitted for the Generative AI World Cup 2024.
 
@@ -33,8 +33,8 @@ Follow these steps to set up the project:
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/no-food-baind.git
-   cd no-food-baind
+   git clone https://github.com/biostella/no-food-behaind.git
+   cd no-food-behaind
    ```
 
 2. Create a Python virtual environment:
@@ -81,16 +81,11 @@ You will need to create a `.env` file in the root of the project with the follow
 
 ```ini
 # Databricks settings
-DATABRICKS_TOKEN=your-databricks-token
-DATABRICKS_URL=https://your-databricks-instance-url
-DATABRICKS_JOB_ID=your-databricks-job-id
+DATABRICKS_TOKEN = your-databricks-token
+DATABRICKS_URL = https://your-databricks-instance-url
+DBFS_PATH = your-database-path
+OPENAI_API_KEY = your-api-key-for-model
 
-# Azure settings
-AZURE_CONNECTION_STRING=your-azure-storage-connection-string
-AZURE_CONTAINER_NAME=your-azure-container-name
-
-# Blob access token
-BLOB_TOKEN=your-blob-access-token
 ```
 
 Make sure to replace the placeholder values with your actual Databricks and Azure credentials.
@@ -103,12 +98,14 @@ Here is an overview of the project's file structure:
 .
 ├── app.py                  # The main Flask app
 ├── helper.py               # Helper functions for Azure and Databricks interactions
+├── prompt.py               # AI prompt
 ├── requirements.txt        # Python dependencies
 ├── .env                    # Environment variables (not committed to version control)
 ├── static/
 │   └── uploads/            # Directory for storing uploaded files temporarily
 ├── templates/
 │   ├── index.html          # Homepage template
+│   ├── loading.html        # Loading template
 │   └── results.html        # Results page template
 └── README.md               # Project documentation (this file)
 ```
